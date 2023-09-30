@@ -71,7 +71,10 @@ impl WebsocketService {
         let id = rand::thread_rng().gen::<usize>();
 
         let scheme = if secure { "wss" } else { "ws" };
-        let ws = WebSocket::open(format!("{}://{}", scheme, path).as_str())?;
+        let ws = match WebSocket::open(format!("{}://{}", scheme, path).as_str()) {
+            Ok(ws) => ws,
+            Err(err) => return Err(WebsocketError::JS(err)),
+        };
         let (mut write, mut read) = ws.split();
 
         let (in_tx, mut in_rx) = channel::<String>(10);
